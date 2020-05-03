@@ -15,23 +15,23 @@ export default function sketch(p) {
   p.draw = () => {
 
     p.background(51);
-    /*
+    p.stroke(255,255,255)
     if (grid != null) {
       for (var i = 0; i < grid.length; i++) {
-
+        
         show(grid[i].getX(), grid[i].getY(), grid[i].getWalls())
       }
     }
-    */
+    
   };
 
 
   function show(x, y, walls = [true, true, true, true]) {
     const w = 35
-    var coord_x = Math.floor(x * w);
-    var coord_y = Math.floor(y * w);
+    var coord_x = Math.floor(x * w + 20);
+    var coord_y = Math.floor(y * w + 20);
+    
 
-    console.log(coord_x, coord_y, walls)
     if (walls[0]) {
       //top
       p.line(coord_x, coord_y, coord_x + w, coord_y)

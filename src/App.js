@@ -43,9 +43,9 @@ export default class App extends React.Component {
         break
       }
       if (this.state.text.charAt(counter) === "-") {
-        cell = new Cell(x, y, [true, false, true, false])
+        cell = new Cell(x, y, [true, false, false, false])
       } else if (this.state.text.charAt(counter) === "|") {
-        cell = new Cell(x, y, [true, false, false, true])
+        cell = new Cell(x, y, [false, false, false, true])
       } else {
         cell = new Cell(x, y, [false, false, false, false])
       }
