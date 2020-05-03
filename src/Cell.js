@@ -8,4 +8,16 @@ export default class Cell {
 
     }
 
+    getX(){
+        return this.x
+    }
+
+    getY(){
+        return this.y
+    }
+
+    getWalls(){
+        return this.walls
+    }
+
 }

@@ -20,7 +20,7 @@ export default class App extends React.Component {
     fileReader.readAsText(file)
     fileReader.onloadend = (e) => {
       var content = e.target.result
-      console.log(content)
+      
       this.setState({
         text: content,
         rows: content.match(new RegExp("\n", "g") || []).length,
@@ -49,7 +49,7 @@ export default class App extends React.Component {
       } else {
         cell = new Cell(x, y, [false, false, false, false])
       }
-      
+
       x++
 
       tmpArr.push(cell)
@@ -57,9 +57,6 @@ export default class App extends React.Component {
     this.setState({
       grid: tmpArr
     })
-
-    console.log(tmpArr)
-
   }
 
   render() {

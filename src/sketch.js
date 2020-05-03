@@ -1,34 +1,37 @@
 export default function sketch(p) {
+  let grid = null
   p.setup = () => {
-    var myCanvas = p.createCanvas(600, 600, p.WEBGL);
+    var myCanvas = p.createCanvas(600, 600);
     myCanvas.parent("canvas");
-
-
   };
 
   p.myCustomRedrawAccordingToNewPropsHandler = (props) => {
     if (props.codedMaze) {
-      for (var i = 0; i < props.codedMaze.length; i++) {
-        console.log(props.codedMaze[i])
-        //show(props.codedMaze[i])
-        
-      }
+      grid = props.codedMaze
 
     }
   };
 
   p.draw = () => {
-    p.background(51);
 
-  
+    p.background(51);
+    /*
+    if (grid != null) {
+      for (var i = 0; i < grid.length; i++) {
+
+        show(grid[i].getX(), grid[i].getY(), grid[i].getWalls())
+      }
+    }
+    */
   };
 
 
   function show(x, y, walls = [true, true, true, true]) {
-    var w = 35.294117647
-    var coord_x = x * w;
-    var coord_y = y * w;
-    p.stroke(255);
+    const w = 35
+    var coord_x = Math.floor(x * w);
+    var coord_y = Math.floor(y * w);
+
+    console.log(coord_x, coord_y, walls)
     if (walls[0]) {
       //top
       p.line(coord_x, coord_y, coord_x + w, coord_y)
