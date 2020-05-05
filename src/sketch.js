@@ -1,5 +1,6 @@
 export default function sketch(p) {
   let grid = null
+  let size
   p.setup = () => {
     var myCanvas = p.createCanvas(600, 600);
     myCanvas.parent("canvas");
@@ -8,26 +9,26 @@ export default function sketch(p) {
   p.myCustomRedrawAccordingToNewPropsHandler = (props) => {
     if (props.codedMaze) {
       grid = props.codedMaze
-
+      size = props.size
     }
   };
 
   p.draw = () => {
 
     p.background(51);
-    p.stroke(255,255,255)
-    if (grid != null) {
+    p.stroke(255,0,0)
+    if (grid != null & size != null) {
       for (var i = 0; i < grid.length; i++) {
         
-        show(grid[i].getX(), grid[i].getY(), grid[i].getWalls())
+        show(grid[i].getX(), grid[i].getY(), grid[i].getWalls(),size)
       }
     }
     
   };
 
 
-  function show(x, y, walls = [true, true, true, true]) {
-    const w = 35
+  function show(x, y, walls = [true, true, true, true], size) {
+    const w = size
     var coord_x = Math.floor(x * w + 20);
     var coord_y = Math.floor(y * w + 20);
     

@@ -19,5 +19,11 @@ export default class Cell {
     getWalls(){
         return this.walls
     }
+    setX(adjust){
+        this.x = adjust
+    }
+    setY(adjust){
+        this.y = adjust
+    }
 
 }

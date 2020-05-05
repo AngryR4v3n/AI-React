@@ -6,7 +6,7 @@ import './Maze.css'
     return (
         <div className="row justify-content-center align-items-center">
             <div className=".col-xl-1" id="canvas">
-                <P5Wrapper codedMaze={props.codedMaze} sketch={sketch} />
+                <P5Wrapper codedMaze={props.codedMaze} sketch={sketch} size={props.dim} />
             </div>
         </div>
     )

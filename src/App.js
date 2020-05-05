@@ -11,8 +11,8 @@ export default class App extends React.Component {
       grid: [],
       cols: 0,
       rows: 0,
-      sizeCell: 10,
-      text: ""
+      sizeCell: 0,
+      text: "",
     }
   }
   handleFile = (file) => {
@@ -20,13 +20,14 @@ export default class App extends React.Component {
     fileReader.readAsText(file)
     fileReader.onloadend = (e) => {
       var content = e.target.result
-      
+
       this.setState({
         text: content,
         rows: content.match(new RegExp("\n", "g") || []).length,
         cols: content.split('\n').length - 1 //count from 0.
       })
     }
+
   }
 
   addFile = (e) => {
@@ -42,9 +43,9 @@ export default class App extends React.Component {
       if (y > this.state.rows) {
         break
       }
-      if (this.state.text.charAt(counter) === "-") {
+      if (this.state.text.charAt(counter) === '-') {
         cell = new Cell(x, y, [true, false, false, false])
-      } else if (this.state.text.charAt(counter) === "|") {
+      } else if (this.state.text.charAt(counter) === '|') {
         cell = new Cell(x, y, [false, false, false, true])
       } else {
         cell = new Cell(x, y, [false, false, false, false])
@@ -57,6 +58,53 @@ export default class App extends React.Component {
     this.setState({
       grid: tmpArr
     })
+    this.calculateDims()
+    //this.checkNeighbor(this.state.grid)
+  }
+
+  calculateDims = (width = 600) => {
+    this.setState({
+      sizeCell: Math.floor(width / this.state.cols)
+    })
+  }
+
+  checkNeighbor = (arr) => {
+    //solo necesitamos renderizar paredes. Si hay columna una posicion en Y arriba y el espacio es vacio, renderizar
+    //      return x + y * this.state.cols  
+    var firstComparison, emptyComparison, neighbor = 0
+    console.log(arr)
+    for (var i = 0; i < arr.length; i++) {
+      neighbor = i + 1
+      
+      if (neighbor >= arr) {
+        break
+      }
+      firstComparison = this.arraysEqual(this.state.grid[i].getWalls(), [true, false, false, false])
+      emptyComparison = this.arraysEqual(this.state.grid[neighbor + 1].getWalls(), [false, false, false, false])
+      console.log(firstComparison)
+      
+      // wall and next is empty
+      if (firstComparison & emptyComparison){
+        //we should check that its not the last in row
+        if(this.state.grid[i].getX()===16){
+          continue
+        } else{
+          //here we draw the wall
+          this.state.grid[i].setX(i+1)
+        }
+      }
+    }
+  }
+
+  arraysEqual(arr1, arr2) {
+    if (arr1.length !== arr2.length)
+      return false;
+    for (var i = arr1.length; i--;) {
+      if (arr1[i] !== arr2[i])
+        return false;
+    }
+
+    return true;
   }
 
   render() {
@@ -74,7 +122,7 @@ export default class App extends React.Component {
                 </div>
                 <button type="submit" id="submit" className="btn btn-primary" onClick={this.addFile}>Submit</button>
               </form>
-              <Maze codedMaze={this.state.grid} />
+              <Maze codedMaze={this.state.grid} dim={this.state.sizeCell} />
             </div>
           </div>
         </div>
