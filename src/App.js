@@ -30,7 +30,7 @@ export default class App extends React.Component {
 
   }
 
-  addFile = (e) => {
+  addFile = async(e) => {
     e.preventDefault()
     let tmpArr = []
     var cell
@@ -55,11 +55,11 @@ export default class App extends React.Component {
 
       tmpArr.push(cell)
     }
-    this.setState({
+    await this.setState({
       grid: tmpArr
     })
-    this.calculateDims()
-    //this.checkNeighbor(this.state.grid)
+    await this.calculateDims()
+    await this.checkNeighbor(this.state.grid)
   }
 
   calculateDims = (width = 600) => {
