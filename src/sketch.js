@@ -19,7 +19,6 @@ export default function sketch(p) {
     p.stroke(255,0,0)
     if (grid != null & size != null) {
       for (var i = 0; i < grid.length; i++) {
-        
         show(grid[i].getX(), grid[i].getY(), grid[i].getWalls(),size)
       }
     }
@@ -29,8 +28,8 @@ export default function sketch(p) {
 
   function show(x, y, walls = [true, true, true, true], size) {
     const w = size
-    var coord_x = Math.floor(x * w + 20);
-    var coord_y = Math.floor(y * w + 20);
+    var coord_x = Math.floor((x + 1) * w );
+    var coord_y = Math.floor((y + 1) * w );
     
 
     if (walls[0]) {

@@ -12,7 +12,7 @@ export default class App extends React.Component {
       cols: 0,
       rows: 0,
       sizeCell: 0,
-      text: "",
+      text: ""
     }
   }
   handleFile = (file) => {
@@ -22,79 +22,67 @@ export default class App extends React.Component {
       var content = e.target.result
 
       this.setState({
-        text: content,
+        text: content.split("\n"),
         rows: content.match(new RegExp("\n", "g") || []).length,
         cols: content.split('\n').length - 1 //count from 0.
       })
     }
 
+
+
   }
 
-  addFile = async(e) => {
+  addFile = (e) => {
     e.preventDefault()
     let tmpArr = []
-    var cell
-    var x = 0, y = 0
-    for (var counter = 0; counter < this.state.text.length; counter++) {
-      if (x > this.state.cols) {
-        x = 0
-        y++
-      }
-      if (y > this.state.rows) {
-        break
-      }
-      if (this.state.text.charAt(counter) === '-') {
-        cell = new Cell(x, y, [true, false, false, false])
-      } else if (this.state.text.charAt(counter) === '|') {
-        cell = new Cell(x, y, [false, false, false, true])
-      } else {
-        cell = new Cell(x, y, [false, false, false, false])
-      }
 
-      x++
-
-      tmpArr.push(cell)
+    for (let i = 0; i < this.state.text.length; i++) {
+      tmpArr.push(this.linetoArr(this.state.text[i]))
     }
-    await this.setState({
-      grid: tmpArr
+
+    //hasta aqui tenemos ya el 2d arr en tmpArr...
+    this.setState({
+      text: tmpArr
     })
-    await this.calculateDims()
-    await this.checkNeighbor(this.state.grid)
+    var leftWalls, downWalls, topWalls, rightWalls;
+    var tmpMap = []
+    //agregemos paredes y eso 
+
+    for (let i = 0; i < 17; i++) {
+      topWalls = new Cell(i, 0, [true, false, true, false])
+      leftWalls = new Cell(0, i, [false, false, false, true])
+      downWalls = new Cell(i, this.state.rows, [false, true, false, false])
+      rightWalls = new Cell(16,i,[false, true, false, false])
+      //maze[0][i] = '#';
+      //maze[16][i] = '#';
+      tmpMap.push(leftWalls, downWalls, topWalls, rightWalls)
+    }
+
+
+    this.setState({
+      grid: tmpMap
+    })
+
+    this.calculateDims()
+
   }
 
   calculateDims = (width = 600) => {
     this.setState({
-      sizeCell: Math.floor(width / this.state.cols)
+      sizeCell: width / this.state.cols
     })
   }
 
-  checkNeighbor = (arr) => {
-    //solo necesitamos renderizar paredes. Si hay columna una posicion en Y arriba y el espacio es vacio, renderizar
-    //      return x + y * this.state.cols  
-    var firstComparison, emptyComparison, neighbor = 0
-    console.log(arr)
-    for (var i = 0; i < arr.length; i++) {
-      neighbor = i + 1
-      
-      if (neighbor >= arr) {
-        break
-      }
-      firstComparison = this.arraysEqual(this.state.grid[i].getWalls(), [true, false, false, false])
-      emptyComparison = this.arraysEqual(this.state.grid[neighbor + 1].getWalls(), [false, false, false, false])
-      console.log(firstComparison)
-      
-      // wall and next is empty
-      if (firstComparison & emptyComparison){
-        //we should check that its not the last in row
-        if(this.state.grid[i].getX()===16){
-          continue
-        } else{
-          //here we draw the wall
-          this.state.grid[i].setX(i+1)
-        }
-      }
+  linetoArr = (str) => {
+    let i = 0
+    let char_arr = []
+    while (str.charAt(i) !== "") {
+      i++
+      char_arr.push(str.charAt(i))
     }
+    return char_arr
   }
+
 
   arraysEqual(arr1, arr2) {
     if (arr1.length !== arr2.length)
@@ -118,7 +106,7 @@ export default class App extends React.Component {
                 <div className="custom-file">
                   <input type="file" accept='.txt' className="custom-file-input" id="customFile"
                     onChange={e => this.handleFile(e.target.files[0])} />
-                  <label className="custom-file-label" htmlfor="customFile">Choose file</label>
+                  <label className="custom-file-label" htmlFor="customFile">Choose file</label>
                 </div>
                 <button type="submit" id="submit" className="btn btn-primary" onClick={this.addFile}>Submit</button>
               </form>
