@@ -28,7 +28,7 @@ export default function sketch(p) {
 
   function show(x, y, walls = [true, true, true, true], size) {
     const w = size
-    var coord_x = Math.floor((x + 1) * w );
+    var coord_x = Math.floor((x + 1 ) * w );
     var coord_y = Math.floor((y + 1) * w );
     
 

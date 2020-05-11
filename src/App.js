@@ -46,16 +46,36 @@ export default class App extends React.Component {
     })
     var leftWalls, downWalls, topWalls, rightWalls;
     var tmpMap = []
-    //agregemos paredes y eso 
+    //agregemos paredes externas
 
     for (let i = 0; i < 17; i++) {
-      topWalls = new Cell(i, 0, [true, false, true, false])
+      topWalls = new Cell(i, 0, [true, false, false, false])
       leftWalls = new Cell(0, i, [false, false, false, true])
-      downWalls = new Cell(i, this.state.rows, [false, true, false, false])
-      rightWalls = new Cell(16,i,[false, true, false, false])
-      //maze[0][i] = '#';
-      //maze[16][i] = '#';
-      tmpMap.push(leftWalls, downWalls, topWalls, rightWalls)
+      downWalls = new Cell(i, 17, [true, false, false, false])
+      rightWalls = new Cell(17, i, [false, false, false, true])
+      tmpMap.push(topWalls, leftWalls, downWalls, rightWalls)
+    }
+
+    //agregamos paredes internas
+    let cell
+    for (let i = 1; i < 17; i++) {
+      for (let j = 1; j < 17; j++) {
+        if (this.state.text[i][j] === '|') {
+          //maze[i][j] = '#';
+          console.log("COLUMN - (row: ", i, "column: ", j,")")
+          tmpMap.push(new Cell(j, i, [false, false, false, true]))
+        }
+        else if (i + 1 >= 17) {
+          break;
+        }
+        else if (this.state.text[i - 1][j] === '|' && this.state.text[i + 1][j] === '|' && this.state.text[i][j] === ' ') {
+          console.log("NEIGHBOR - (row: ", i, "column: ", j,")")
+          tmpMap.push(new Cell(j, i, [false, false, false, true]))
+        }
+        else
+          tmpMap.push(new Cell(i, j, [false, true, false, false]))
+      }
+      
     }
 
 
@@ -69,7 +89,7 @@ export default class App extends React.Component {
 
   calculateDims = (width = 600) => {
     this.setState({
-      sizeCell: width / this.state.cols
+      sizeCell: Math.floor(width / this.state.cols) - 3
     })
   }
 
@@ -77,8 +97,9 @@ export default class App extends React.Component {
     let i = 0
     let char_arr = []
     while (str.charAt(i) !== "") {
-      i++
       char_arr.push(str.charAt(i))
+      i++
+
     }
     return char_arr
   }
