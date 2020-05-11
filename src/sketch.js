@@ -16,21 +16,21 @@ export default function sketch(p) {
   p.draw = () => {
 
     p.background(51);
-    p.stroke(255,0,0)
+    p.stroke(255, 0, 0)
     if (grid != null & size != null) {
       for (var i = 0; i < grid.length; i++) {
-        show(grid[i].getX(), grid[i].getY(), grid[i].getWalls(),size)
+        show(grid[i].getX(), grid[i].getY(), grid[i].getWalls(), size)
       }
     }
-    
+
   };
 
 
   function show(x, y, walls = [true, true, true, true], size) {
     const w = size
-    var coord_x = Math.floor((x + 1 ) * w );
-    var coord_y = Math.floor((y + 1) * w );
-    
+    var coord_x = Math.floor((x + 1) * w);
+    var coord_y = Math.floor((y + 1) * w);
+
 
     if (walls[0]) {
       //top
@@ -39,12 +39,12 @@ export default function sketch(p) {
 
     if (walls[1]) {
       //right
-      p.line(coord_x + w, coord_y, coord_x + w, coord_y)
+      p.line(coord_x, coord_y, coord_x + w, coord_y)
     }
 
     if (walls[2]) {
       //bottom
-      p.line(coord_x + w, coord_y + w, coord_x, coord_y + w)
+      p.line(coord_x, coord_y + w, coord_x + w, coord_y + w)
     }
 
     if (walls[3]) {

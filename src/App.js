@@ -57,11 +57,11 @@ export default class App extends React.Component {
     }
 
     //agregamos paredes internas
-    for (let i = 1; i < 17; i++) {
-      for (let j = 1; j < 17; j++) {
+    for (let i = 1; i < 16; i++) {
+      for (let j = 1; j < 16; j++) {
         if (this.state.text[i][j] === '|') {
           //maze[i][j] = '#';
-          console.log("COLUMN - (row: ", i, "column: ", j, ")")
+          
           if (j === 16) {
             continue
           } else {
@@ -69,11 +69,11 @@ export default class App extends React.Component {
           }
 
         }
-        else if (i + 1 >= 17) {
+        else if (i + 1 >= 16) {
           break;
         }
         else if (this.state.text[i - 1][j] === '|' && this.state.text[i + 1][j] === '|' && this.state.text[i][j] === ' ') {
-          console.log("NEIGHBOR - (row: ", i, "column: ", j, ")")
+          
           if (j === 16) {
             continue
           } else {
@@ -81,26 +81,24 @@ export default class App extends React.Component {
           }
         }
         else
-          tmpMap.push(new Cell(j, i, [false, true, false, false]))
+          tmpMap.push(new Cell(j, i, [false, false, false, false]))
       }
     }
-    for (let i = 1; i < 17; i++) {
-      for (let j = 1; j < 17; j++) {
+    for (let i = 1; i < 16; i++) {
+      for (let j = 1; j < 16; j++) {
         if (this.state.text[i][j] === '-') {
-          //maze[i][j] = '#';
-          console.log("ROW - (row: ", i, "column: ", j, ")")
           tmpMap.push(new Cell(j, i, [false, false, true, false]))
         }
-        else if (j + 1 >= 17) {
-          break;
-        }
-        else if (this.state.text[i][j - i] === '-' && this.state.text[i][j + 1] === '-' && this.state.text[i][j] === ' ') {
-          console.log("NEIGHBOR - (row: ", i, "column: ", j, ")")
+        
+        if (this.state.text[i][j - 1] === '-' && this.state.text[i][j + 1] === '-' && this.state.text[i][j] === ' ') {
+          console.log("if youre watching this, ily")
           tmpMap.push(new Cell(j, i, [false, false, true, false]))
         }
+        else
+          tmpMap.push(new Cell(j, i, [false, false, false, false]))
       }
     }
-    console.log(this.state.text[16][13])
+  
     this.setState({
       grid: tmpMap
     })
