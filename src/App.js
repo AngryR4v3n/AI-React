@@ -12,9 +12,40 @@ export default class App extends React.Component {
       cols: 0,
       rows: 0,
       sizeCell: 0,
-      text: ""
+      text: "",
+      special: []
     }
   }
+  getMaze = () => {
+    let arr = new Array(this.state.rows);
+    //init
+    for (let i = 0; i < this.state.text.length; i++) {
+      arr[i] = new Array(this.state.cols)
+    }
+
+    for (let i = 0; i < this.state.text.length; i++) {
+      for (let j = 0; j < this.state.text[0].length; j++) {
+        if (this.state.text[i][j] === '-' | this.state.text[i][j] === "|") {
+          arr[i][j] = 1
+        } else {
+          arr[i][j] = 0
+        }
+      }
+    }
+
+    //ok lets set outer walls and stuff:
+    for (let i = 0; i < this.state.rows; i++) {
+      arr[0][i] = 1
+      arr[i][0] = 1
+      arr[17][i] = 1
+      arr[i][17] = 1
+    }
+
+    this.setState({
+      actualMaze: arr
+    })
+  }
+
   handleFile = (file) => {
     var fileReader = new FileReader()
     fileReader.readAsText(file)
@@ -23,8 +54,8 @@ export default class App extends React.Component {
 
       this.setState({
         text: content.split("\n"),
-        rows: content.match(new RegExp("\n", "g") || []).length,
-        cols: content.split('\n').length - 1 //count from 0.
+        rows: content.match(new RegExp("\n", "g") || []).length - 1,
+        cols: content.split('\n').length - 2 //count from 0.
       })
     }
 
@@ -35,20 +66,25 @@ export default class App extends React.Component {
   addFile = (e) => {
     e.preventDefault()
     let tmpArr = []
-
+    let specialArr = []
     for (let i = 0; i < this.state.text.length; i++) {
-      tmpArr.push(this.linetoArr(this.state.text[i]))
+      if (isNaN(parseInt(this.state.text[i].charAt(0)))) {
+        tmpArr.push(this.linetoArr(this.state.text[i]))
+      } else {
+        specialArr.push(this.state.text[i])
+      }
     }
 
     //hasta aqui tenemos ya el 2d arr en tmpArr...
     this.setState({
-      text: tmpArr
+      text: tmpArr,
+      special: specialArr
     })
     var leftWalls, downWalls, topWalls, rightWalls;
     var tmpMap = []
     //agregemos paredes externas
 
-    for (let i = 0; i < 17; i++) {
+    for (let i = 0; i < this.state.rows; i++) {
       topWalls = new Cell(i, 0, [true, false, false, false])
       leftWalls = new Cell(0, i, [false, false, false, true])
       downWalls = new Cell(i, 17, [true, false, false, false])
@@ -61,7 +97,7 @@ export default class App extends React.Component {
       for (let j = 1; j < 16; j++) {
         if (this.state.text[i][j] === '|') {
           //maze[i][j] = '#';
-          
+
           if (j === 16) {
             continue
           } else {
@@ -73,7 +109,7 @@ export default class App extends React.Component {
           break;
         }
         else if (this.state.text[i - 1][j] === '|' && this.state.text[i + 1][j] === '|' && this.state.text[i][j] === ' ') {
-          
+
           if (j === 16) {
             continue
           } else {
@@ -89,22 +125,22 @@ export default class App extends React.Component {
         if (this.state.text[i][j] === '-') {
           tmpMap.push(new Cell(j, i, [false, false, true, false]))
         }
-        
+
         if (this.state.text[i][j - 1] === '-' && this.state.text[i][j + 1] === '-' && this.state.text[i][j] === ' ') {
-          console.log("if youre watching this, ily")
+
           tmpMap.push(new Cell(j, i, [false, false, true, false]))
         }
         else
           tmpMap.push(new Cell(j, i, [false, false, false, false]))
       }
     }
-  
+
     this.setState({
       grid: tmpMap
     })
 
     this.calculateDims()
-
+    this.getMaze()
   }
 
   calculateDims = (width = 600) => {
