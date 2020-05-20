@@ -23,12 +23,30 @@ export default class App extends React.Component {
       arr[i] = new Array(this.state.cols)
     }
 
-    for (let i = 0; i < this.state.text.length; i++) {
-      for (let j = 0; j < this.state.text[0].length; j++) {
-        if (this.state.text[i][j] === '-' | this.state.text[i][j] === "|") {
+    for (let j = 1; j < this.state.text[0].length; j++) {
+      for (let i = 1; i < this.state.text.length; i++) {
+
+        if (this.state.text[i][j] === '|') {
           arr[i][j] = 1
-        } else {
+        }
+        else if (i + 1 >= this.state.text.length) {
+          break
+        }
+        else if (this.state.text[i - 1][j] === '|' && this.state.text[i + 1][j] === '|' && this.state.text[i][j] === ' '){
+          arr[i][j] = 1
+        } else{
           arr[i][j] = 0
+        }
+      }
+    }
+
+    for(let i = 1; i<this.state.text.length; i++){
+      for(let j = 1; j<this.state.text[0].length; j++){
+        if(this.state.text[i][j] === '-'){
+          arr[i][j] = 1
+        }
+        else if(this.state.text[i][j - 1] === '-' && this.state.text[i][j + 1] === '-' && this.state.text[i][j] === ' '){
+          arr[i][j] = 1
         }
       }
     }
@@ -37,9 +55,11 @@ export default class App extends React.Component {
     for (let i = 0; i < this.state.rows; i++) {
       arr[0][i] = 1
       arr[i][0] = 1
-      arr[17][i] = 1
-      arr[i][17] = 1
+      arr[this.state.rows][i] = 1
+      arr[i][this.state.cols] = 1
     }
+
+
 
     this.setState({
       actualMaze: arr
