@@ -87,30 +87,30 @@ export default class App extends React.Component {
     for (let i = 0; i < this.state.rows; i++) {
       topWalls = new Cell(i, 0, [true, false, false, false])
       leftWalls = new Cell(0, i, [false, false, false, true])
-      downWalls = new Cell(i, 17, [true, false, false, false])
-      rightWalls = new Cell(17, i, [false, false, false, true])
+      downWalls = new Cell(i, this.state.cols, [true, false, false, false])
+      rightWalls = new Cell(this.state.rows, i, [false, false, false, true])
       tmpMap.push(topWalls, leftWalls, downWalls, rightWalls)
     }
 
     //agregamos paredes internas
-    for (let i = 1; i < 16; i++) {
-      for (let j = 1; j < 16; j++) {
+    for (let i = 1; i < this.state.rows - 1; i++) {
+      for (let j = 1; j < this.state.cols - 1; j++) {
         if (this.state.text[i][j] === '|') {
           //maze[i][j] = '#';
 
-          if (j === 16) {
+          if (j === this.state.cols - 1) {
             continue
           } else {
             tmpMap.push(new Cell(j, i, [false, false, false, true]))
           }
 
         }
-        else if (i + 1 >= 16) {
+        else if (i + 1 >= this.state.rows - 1) {
           break;
         }
         else if (this.state.text[i - 1][j] === '|' && this.state.text[i + 1][j] === '|' && this.state.text[i][j] === ' ') {
 
-          if (j === 16) {
+          if (j === this.state.cols - 1) {
             continue
           } else {
             tmpMap.push(new Cell(j, i, [false, false, false, true]))
@@ -120,8 +120,8 @@ export default class App extends React.Component {
           tmpMap.push(new Cell(j, i, [false, false, false, false]))
       }
     }
-    for (let i = 1; i < 16; i++) {
-      for (let j = 1; j < 16; j++) {
+    for (let i = 1; i < this.state.rows - 1; i++) {
+      for (let j = 1; j < this.state.cols - 1; j++) {
         if (this.state.text[i][j] === '-') {
           tmpMap.push(new Cell(j, i, [false, false, true, false]))
         }
