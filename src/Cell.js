@@ -8,22 +8,34 @@ export default class Cell {
 
     }
 
-    getX(){
+    getX() {
         return this.x
     }
 
-    getY(){
+    getY() {
         return this.y
     }
 
-    getWalls(){
+    getWalls() {
         return this.walls
     }
-    setX(adjust){
+    setX(adjust) {
         this.x = adjust
     }
-    setY(adjust){
+    setY(adjust) {
         this.y = adjust
+    }
+    setWalls(arr = [true, true, true, true]) {
+        //this will avoid override of previously defined walls.
+        let oldArr = this.getWalls()
+        for (let i = 0; i < oldArr.length; i++) {
+            if(oldArr[i] === true & arr[i] === false){
+                arr[i] = true
+            } else if(oldArr[i] === false & arr[i] === true){
+                arr[i] = true
+            }
+        }
+        this.walls = arr
     }
 
 }

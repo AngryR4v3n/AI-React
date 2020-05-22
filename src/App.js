@@ -108,8 +108,9 @@ export default class App extends React.Component {
       })
     }
 
-
-
+  }
+  indexTrans = (i, j) => {
+    return i + j * (this.state.cols);
   }
 
   addFile = (e) => {
@@ -129,44 +130,67 @@ export default class App extends React.Component {
       text: tmpArr,
       special: specialArr
     })
-    var leftWalls, downWalls, topWalls, rightWalls;
-    var tmpMap = []
-    //agregemos paredes externas
 
+    var tmpMap = []
+    //carguemos el mapa
     for (let i = 0; i < this.state.rows; i++) {
-      topWalls = new Cell(i, 0, [true, false, false, false])
-      leftWalls = new Cell(0, i, [false, false, false, true])
-      downWalls = new Cell(i, this.state.cols, [true, false, false, false])
-      rightWalls = new Cell(this.state.rows, i, [false, false, false, true])
-      tmpMap.push(topWalls, leftWalls, downWalls, rightWalls)
+      for (let j = 0; j < this.state.cols; j++) {
+        tmpMap.push(new Cell(j, i, [false, false, false, false]))
+      }
     }
 
-    //agregamos paredes internas
-    for (let i = 1; i < this.state.rows - 1; i++) {
-      for (let j = 1; j < this.state.cols - 1; j++) {
+    //agregemos paredes externas
+    for (let i = 0; i < this.state.rows; i++) {
+
+      //top border
+      tmpMap[this.indexTrans(i, 0)].setWalls([true, false, false, false])
+      //left border
+      tmpMap[this.indexTrans(0, i)].setWalls([false, false, false, true])
+      //down
+      tmpMap[this.indexTrans(i, this.state.cols - 1)].setWalls([false, false, true, false])
+      // right border
+      tmpMap[this.indexTrans(this.state.rows - 1, i)].setWalls([false, true, false, false])
+
+
+    }
+
+    //agregemos paredes internas
+    for (let i = 1; i < this.state.rows; i++) {
+      for (let j = 1; j < this.state.cols; j++) {
         if (this.state.text[i][j] === '|') {
           if (j === this.state.cols - 1) {
             continue
           } else {
-            tmpMap.push(new Cell(j, i, [false, false, false, true]))
+            tmpMap[this.indexTrans(j, i)].setWalls([false, false, false, true])
           }
-
         }
-        else if (i + 1 >= this.state.rows - 1) {
+        else if (i + 1 > this.state.rows) {
           break;
         }
-        else if (this.state.text[i - 1][j] === '|' && this.state.text[i + 1][j] === '|' && this.state.text[i][j] === ' ') {
-
+        else if (this.state.text[i - 1][j] === '|' & this.state.text[i + 1][j] === '|' & this.state.text[i][j] === ' ') {
+          //we dont want to alter the borders
           if (j === this.state.cols - 1) {
             continue
           } else {
-            tmpMap.push(new Cell(j, i, [false, false, false, true]))
+            tmpMap[this.indexTrans(j, i)].setWalls([false, false, false, true])
           }
         }
-        else
-          tmpMap.push(new Cell(j, i, [false, false, false, false]))
+
       }
     }
+
+    for (let i = 1; i < this.state.rows; i++) {
+      for (let j = 1; j < this.state.cols; j++) {
+        if (this.state.text[i][j] === '-') {
+          tmpMap[this.indexTrans(j, i)].setWalls([false, false, true, false])
+        }
+        if (this.state.text[i][j - 1] === '-' && this.state.text[i][j + 1] === '-' && this.state.text[i][j] === ' ') {
+          tmpMap[this.indexTrans(j, i)].setWalls([false, false, true, false])
+        }
+      }
+    }
+
+    /*
     for (let i = 1; i < this.state.rows - 1; i++) {
       for (let j = 1; j < this.state.cols - 1; j++) {
         if (this.state.text[i][j] === '-') {
@@ -181,6 +205,7 @@ export default class App extends React.Component {
           tmpMap.push(new Cell(j, i, [false, false, false, false]))
       }
     }
+    */
 
     this.setState({
       grid: tmpMap

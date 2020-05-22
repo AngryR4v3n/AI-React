@@ -39,7 +39,7 @@ export default function sketch(p) {
 
     if (walls[1]) {
       //right
-      p.line(coord_x, coord_y, coord_x + w, coord_y)
+      p.line(coord_x + w, coord_y, coord_x + w, coord_y + w)
     }
 
     if (walls[2]) {
