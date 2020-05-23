@@ -38,14 +38,14 @@ export default function sketch(p) {
         console.log('haha')
       } else{
         finish = bfs(grid)
-        console('im out')
+        console.log('im out')
       }
     }
 
   };
 
   function isFree(i, j) {
-    if (i >= 0 & i < grid.length & j >= 0 & j < grid.length & (grid[indexTrans(i, j, cols)].getValue() === 0 | grid[indexTrans(i, j, cols)].getValue() === 9 | grid[indexTrans(i, j, cols)].getValue() === 2)) {
+    if (i >= 0 & i < grid.length & j >= 0 & j < grid.length & (grid[indexTrans(i, j, cols)].getValue() === 0 | grid[indexTrans(i, j, cols)].getValue() === 9)) {
       return true
     } else {
       return false
