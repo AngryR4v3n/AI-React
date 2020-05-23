@@ -18,7 +18,7 @@ export default class App extends React.Component {
     }
   }
 
-  
+
   identifySpecials = (paramArr) => {
     let entrance = this.state.text[this.state.text.length - 2]
     let exit = this.state.text[this.state.text.length - 1]
@@ -30,6 +30,9 @@ export default class App extends React.Component {
     //change values of real matrix
     paramArr[utils.indexTrans(entrance[0], entrance[1], this.state.cols)].setValue(2)
     paramArr[utils.indexTrans(exit[0], exit[1], this.state.cols)].setValue(9)
+    this.setState({
+      special: entrance
+    })
 
   }
 
@@ -52,11 +55,11 @@ export default class App extends React.Component {
   addFile = (e) => {
     e.preventDefault()
     let tmpArr = []
-    
+
     for (let i = 0; i < this.state.text.length; i++) {
       if (isNaN(parseInt(this.state.text[i].charAt(0)))) {
         tmpArr.push(this.linetoArr(this.state.text[i]))
-      } 
+      }
     }
 
     //hasta aqui tenemos ya el 2d arr en tmpArr...
@@ -68,7 +71,7 @@ export default class App extends React.Component {
     //carguemos el mapa
     for (let i = 0; i < this.state.rows; i++) {
       for (let j = 0; j < this.state.cols; j++) {
-        tmpMap.push(new Cell(j, i, [false, false, false, false],0))
+        tmpMap.push(new Cell(j, i, [false, false, false, false], 0))
       }
     }
 
@@ -134,7 +137,7 @@ export default class App extends React.Component {
     this.setState({
       grid: tmpMap
     })
-    
+
     this.calculateDims()
   }
 
@@ -154,7 +157,7 @@ export default class App extends React.Component {
     }
     return char_arr
   }
-  
+
   render() {
     return (
       <div className="App">
@@ -170,7 +173,7 @@ export default class App extends React.Component {
                 </div>
                 <button type="submit" id="submit" className="btn btn-primary" onClick={this.addFile}>Submit</button>
               </form>
-              <Maze mazeGrid={this.state.actualMaze} codedMaze={this.state.grid} dim={this.state.sizeCell} />
+              <Maze mazeGrid={this.state.actualMaze} codedMaze={this.state.grid} dim={this.state.sizeCell} cols={this.state.cols} mazeStart={this.state.special} />
             </div>
           </div>
         </div>
