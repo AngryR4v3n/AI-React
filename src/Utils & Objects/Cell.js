@@ -1,10 +1,12 @@
 
 export default class Cell {
-    constructor(x, y, arr = [true, true, true, true]) {
+    constructor(x, y, arr = [true, true, true, true], mazeValue) {
         this.x = x;
         this.y = y;
         // top, right, bottom, left
         this.walls = arr
+        this.visited = false
+        this.value = mazeValue
 
     }
 
@@ -36,6 +38,19 @@ export default class Cell {
             }
         }
         this.walls = arr
+    }
+    getVisited(){
+        return this.visited
+    }
+
+    setVisited(val){
+        this.visited = val
+    }
+    getValue(){
+        return this.value
+    }
+    setValue(val){
+        this.value = val
     }
 
 }

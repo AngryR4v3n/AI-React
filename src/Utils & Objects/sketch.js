@@ -4,6 +4,7 @@ export default function sketch(p) {
   p.setup = () => {
     var myCanvas = p.createCanvas(600, 600);
     myCanvas.parent("canvas");
+    p.frameRate(5)
   };
 
   p.myCustomRedrawAccordingToNewPropsHandler = (props) => {
