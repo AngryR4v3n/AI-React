@@ -3,21 +3,24 @@ import { indexTrans } from "./functions";
 export default function sketch(p) {
   let grid = null
   let size = null
-  let alg
   let mazeStart = []
   let cols
+  let execute = false
   p.setup = () => {
     var myCanvas = p.createCanvas(600, 600);
     myCanvas.parent("canvas");
     p.frameRate(1)
+    //p.noLoop()
   };
 
   p.myCustomRedrawAccordingToNewPropsHandler = (props) => {
-    if (props.codedMaze) {
+    if (props.codedMaze.length > 0) {
       grid = props.codedMaze
       size = props.size
       cols = props.cols
       mazeStart = props.mazeStart
+      execute = true
+      console.log(execute)
     }
   };
 
@@ -32,75 +35,80 @@ export default function sketch(p) {
 
       }
 
-      //check which alg to use:
-      let finish = 1 
-      if(finish === null){
-        console.log('haha')
-      } else{
-        finish = bfs(grid)
-        console.log('im out')
-      }
     }
 
-  };
+    
+    if(execute === true){
+      bfs(grid)
+      execute = false
+    }  
+  }
 
   function isFree(i, j) {
-    if (i >= 0 & i < grid.length & j >= 0 & j < grid.length & (grid[indexTrans(i, j, cols)].getValue() === 0 | grid[indexTrans(i, j, cols)].getValue() === 9)) {
+    if (i >= 0 & i < grid.length & j >= 0 & j < grid.length & (grid[indexTrans(i, j, cols)].getValue() === 0 | grid[indexTrans(i, j, cols)].getValue() === 9 | grid[indexTrans(i, j, cols)].getValue() === 2)) {
+      console.log('letting value:', grid[indexTrans(i, j, cols)].getValue(), 'at positions', grid[indexTrans(i, j, cols)].getX(), grid[indexTrans(i, j, cols)].getY())
       return true
-    } else {
-      return false
     }
+    console.log('NOT value:', grid[indexTrans(i, j, cols)].getValue(), 'at positions', grid[indexTrans(i, j, cols)].getX(), grid[indexTrans(i, j, cols)].getY())
+    return false
   }
   function bfs(maze) {
     let q = [];
+    let interactions = 0;
     if (maze.length > 0) {
-      
+      maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setValue(2)
       q.push(maze[indexTrans(mazeStart[0], mazeStart[1], cols)])
-      while (q.length > 0) {
+      while (q.length > 0 & interactions < 700) {
         let cell = q.shift()
-        
+        console.log("CURRENT POSITION", cell.getX(), cell.getY(), "AT VALUE", cell.getValue())
         if (maze[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
-          break
-          
+          console.log("reached")
+          return null
         }
-        if (isFree(cell.getX() + 1, cell.getY())) {
-          console.log("cond1")
+        if (isFree(cell.getX() + 1, cell.getY()) === true) {
+          console.log("RIGHT")
           maze[indexTrans(cell.getX(), cell.getY(), cols)].setValue(2)
           maze[indexTrans(cell.getX(), cell.getY(), cols)].setVisited(true)
           //visita el siguiente punto.
           let next = maze[indexTrans(cell.getX() + 1, cell.getY(), cols)]
           q.push(next)
         }
-        if (isFree(cell.getX() - 1, cell.getY())) {
-          console.log("cond2")
+        else if (isFree(cell.getX() - 1, cell.getY()) === true) {
+          console.log("LEFT")
           maze[indexTrans(cell.getX(), cell.getY(), cols)].setValue(2)
           maze[indexTrans(cell.getX(), cell.getY(), cols)].setVisited(true)
           //visita el siguiente punto.
           let next = maze[indexTrans(cell.getX() - 1, cell.getY(), cols)]
           q.push(next)
         }
-        if (isFree(cell.getX(), cell.getY() + 1)) {
-          console.log("cond3")
+        else if (isFree(cell.getX(), cell.getY() + 1) === true) {
+          console.log("DOWN")
           maze[indexTrans(cell.getX(), cell.getY(), cols)].setValue(2)
           maze[indexTrans(cell.getX(), cell.getY(), cols)].setVisited(true)
           //visita el siguiente punto.
           let next = maze[indexTrans(cell.getX(), cell.getY() + 1, cols)]
           q.push(next)
         }
-        if (isFree(cell.getX(), cell.getY() - 1)) {
-          console.log("cond4")
+        else if (isFree(cell.getX(), cell.getY() - 1) === true) {
+          console.log("UP")
           maze[indexTrans(cell.getX(), cell.getY(), cols)].setValue(2)
           maze[indexTrans(cell.getX(), cell.getY(), cols)].setVisited(true)
           //visita el siguiente punto.
           let next = maze[indexTrans(cell.getX(), cell.getY() - 1, cols)]
           q.push(next)
         }
-      } 
-    } else{
-      return null
-    }
+        /*
+        else{
+          console.log("null case ", cell.getX(), cell.getY())
+        }*/
 
-    return null
+        interactions++
+      }
+    } else {
+      return null
+
+    }
+    return 'hola'
   }
 
   function show(x, y, walls = [true, true, true, true], value, size) {
@@ -109,22 +117,26 @@ export default function sketch(p) {
     var coord_y = Math.floor((y + 1) * w);
 
     switch (value) {
+      //visited
       case 2:
         p.stroke(255, 0, 255, 100)
         p.fill(255, 0, 255, 100)
-        p.rect(coord_y, coord_x, w, w)
+        p.rect(coord_x, coord_y, w, w)
+        p.stroke(255, 255, 255)
         break
-
+      //salida
       case 9:
         p.stroke(255, 0, 100)
         p.fill(255, 0, 100)
         p.rect(coord_y, coord_x, w, w)
+        p.stroke(255, 255, 255)
         break
-
+      //entrada
       case 3:
         p.stroke(14, 239, 21)
         p.fill(14, 239, 21)
-        p.rect(coord_y, coord_x, w, w)
+        p.rect(coord_x, coord_y, w, w)
+        p.stroke(255, 255, 255)
         break
       default:
         p.stroke(255, 255, 255)

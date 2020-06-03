@@ -28,7 +28,7 @@ export default class App extends React.Component {
     entrance = utils.transformLocations(entrance)
     exit = utils.transformLocations(exit)
     //change values of real matrix
-    paramArr[utils.indexTrans(entrance[0], entrance[1], this.state.cols)].setValue(2)
+    paramArr[utils.indexTrans(entrance[0], entrance[1], this.state.cols)].setValue(3)
     paramArr[utils.indexTrans(exit[0], exit[1], this.state.cols)].setValue(9)
     this.setState({
       special: entrance
