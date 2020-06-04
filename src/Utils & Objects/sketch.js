@@ -1,8 +1,5 @@
 import { indexTrans } from "./functions";
 //variables for path backtrack tracing
-let map = {};
-let lastPoint;
-let startPoint;
 
 export default function sketch(p) {
   let grid = null;
@@ -10,14 +7,21 @@ export default function sketch(p) {
   let mazeStart = [];
   let cols;
   let execute = false;
-  let alg = null
+  let alg = null;
+
+  let map = {};
+  let lastPoint;
+  let startPoint;
+
+  let index;
+  let q = [];
+  let cell = undefined;
 
   //setup of maze with null values.
   p.setup = () => {
     var myCanvas = p.createCanvas(600, 600);
     myCanvas.parent("canvas");
-    p.frameRate(30);
-
+    p.frameRate(120);
   };
   //This is called when props are updated.
   p.myCustomRedrawAccordingToNewPropsHandler = (props) => {
@@ -27,282 +31,313 @@ export default function sketch(p) {
       cols = props.cols;
       mazeStart = props.mazeStart;
       execute = true;
-      alg = props.alg
-    }
-  };
+      alg = props.alg;
 
-  p.draw = async () => {
-    p.background(51);
-    p.stroke(255, 255, 255);
-    if ((grid != null) & (size != null)) {
-      for (var i = 0; i < grid.length; i++) {
-        show(
-          grid[i].getX(),
-          grid[i].getY(),
-          grid[i].getWalls(),
-          grid[i].getValue(),
-          grid[i].getVisited(),
-          size
-        );
-      }
-    }
-    //decides which algorithm we will use
-    if (execute === true) {
-      switch (alg) {
-        case "1":
-          await bfs(grid);
-          break;
-        case "2":
-          await dfs(grid);
-          break
-        case null:
-          console.log("pass")
-          break
+      if (grid.length > 0) {
+        // Set the start point
+        if (
+          grid[indexTrans(mazeStart[0], mazeStart[1], cols)].getValue() !== 9
+        ) {
+          grid[indexTrans(mazeStart[0], mazeStart[1], cols)].setValue(3);
+        }
 
-        default:
-          alert("This is a major error")
-          break;
-      }
-      //draw path
-      execute = false;
-      let path = await makePath();
-      grid[startPoint].setValue(3)
-      for (let i = 0; i < path.length; i++) {
-        grid[path[i]].setValue(9)
+        // Add the start point to queue
+        q.push(grid[indexTrans(mazeStart[0], mazeStart[1], cols)]);
+        startPoint = indexTrans(mazeStart[0], mazeStart[1], cols);
       }
     }
-  };
-  /**
-   * Function that provided as key the parent cell will return the child cells, used to backtrack original position.
-   */
-  function makePath() {
-    let path = [];
-    let crr = lastPoint;
-    while (crr !== startPoint) {
-      for (let key in map) {
-        if (map[parseInt(key)].includes(crr)) {
-          path.push(crr);
-          crr = parseInt(key);
+
+    p.draw = async () => {
+      p.background(51);
+      p.stroke(255, 255, 255);
+      if ((grid != null) & (size != null)) {
+        for (var i = 0; i < grid.length; i++) {
+          show(
+            grid[i].getX(),
+            grid[i].getY(),
+            grid[i].getWalls(),
+            grid[i].getValue(),
+            grid[i].getVisited(),
+            size
+          );
         }
       }
 
+      //decides which algorithm we will use
+      if (execute === true) {
+        switch (alg) {
+          case "1":
+            execute = bfs();
+            break;
+          case "2":
+            dfs(grid);
+            break;
+          case null:
+            console.log("pass");
+            break;
+
+          default:
+            alert("This is a major error");
+            break;
+        }
+        //draw path
+        if (!execute) {
+          console.log("Map:", map);
+          let path = makePath();
+          await grid[startPoint].setValue(3);
+          for (let i = 0; i < path.length; i++) {
+            await grid[path[i]].setValue(9);
+          }
+          await grid[lastPoint].setValue(3);
+
+        }
+      }
+    };
+    /**
+     * Function that provided as key the parent cell will return the child cells, used to backtrack original position.
+     */
+    function makePath() {
+      let path = [];
+      let crr = lastPoint;
+
+      while (crr !== startPoint) {
+        console.log("Current value:", crr)
+        for (let key in map) {
+          if (map[parseInt(key)].includes(crr)) {
+            path.push(crr);
+            crr = parseInt(key);
+          }
+        }
+      }
+      return path;
     }
-    return path;
-  }
-  /**
-   * Used by BFS to determine whether it can be visited or not.
-   * @param {*} i -> x
-   * @param {*} j  -> y
-   */
-  function isFree(i, j) {
-    if (
-      (i >= 0) &
-      (i < grid.length) &
-      (j >= 0) &
-      (j < grid.length) &
-      ((grid[indexTrans(i, j, cols)].getValue() === 0) |
-        (grid[indexTrans(i, j, cols)].getValue() === 9))
-    ) {
+    /**
+     * Used by BFS to determine whether it can be visited or not.
+     * @param {*} i -> x
+     * @param {*} j  -> y
+     */
+    function isFree(i, j) {
+      if (
+        (i >= 0) &
+        (i < grid.length) &
+        (j >= 0) &
+        (j < grid.length) &
+        ((grid[indexTrans(i, j, cols)].getValue() === 0) |
+          (grid[indexTrans(i, j, cols)].getValue() === 9))
+      ) {
+        return true;
+      }
+
+      return false;
+    }
+    /**
+     * Provided the encoded 1D array of cells it will traverse it via BFS method
+     * @param {*} maze
+     */
+    function bfs() {
+      // cell = q.splice(0, 1)[0];
+      cell = q.shift();
+      console.log(q);
+      
+      index = indexTrans(cell.getX(), cell.getY(), cols);
+      
+      if (grid[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 2) {
+        
+        return true;
+      }
+
+      map[index] = [];
+
+      if(indexTrans(cell.getX(), cell.getY(), cols) === 31){
+        console.log("Right Neighbor:", isFree(cell.getX()+1, cell.getY()))
+        console.log("Left Neighbor:", isFree(cell.getX()-1, cell.getY()))
+        console.log("Up Neighbor:", isFree(cell.getX(), cell.getY()-1))
+        console.log("Bottom Neighbor:", isFree(cell.getX(), cell.getY()+1))
+
+      }
+
+      if (grid[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
+        console.log("Finish!!!");
+        lastPoint = indexTrans(cell.getX(), cell.getY(), cols);
+        return false;
+      }
+
+      grid[indexTrans(cell.getX(), cell.getY(), cols)].setValue(2);
+      grid[indexTrans(cell.getX(), cell.getY(), cols)].setVisited(true);
+
+      //Right neighbor
+      if (isFree(cell.getX() + 1, cell.getY()) === true) {
+        let next = grid[indexTrans(cell.getX() + 1, cell.getY(), cols)];
+        map[index].push(indexTrans(cell.getX() + 1, cell.getY(), cols));
+        q.push(next);
+      }
+      //Left neighbor
+      if (isFree(cell.getX() - 1, cell.getY()) === true) {
+        let next = grid[indexTrans(cell.getX() - 1, cell.getY(), cols)];
+        map[index].push(indexTrans(cell.getX() - 1, cell.getY(), cols));
+        q.push(next);
+      }
+      //Down neighbor
+      if (isFree(cell.getX(), cell.getY() + 1) === true) {
+        let next = grid[indexTrans(cell.getX(), cell.getY() + 1, cols)];
+        map[index].push(indexTrans(cell.getX(), cell.getY() + 1, cols));
+        q.push(next);
+      }
+      //Up neighbor
+      if (isFree(cell.getX(), cell.getY() - 1) === true) {
+        let next = grid[indexTrans(cell.getX(), cell.getY() - 1, cols)];
+        map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
+        q.push(next);
+      }
+
       return true;
     }
 
-    return false;
-  }
-  /**
-   * Provided the encoded 1D array of cells it will traverse it via BFS method
-   * @param {*} maze 
-   */
-  async function bfs(maze) {
-    let index;
-    let q = [];
-    let cell = undefined;
-    if (maze.length > 0) {
-      // Set the start point
+    /**
+     * Provided the encoded 1D array of cells it will traverse it via DFS method
+     * @param {*} maze
+     */
+    async function dfs(maze) {
+      let q = [];
+      let cell = undefined;
+      let index;
       if (maze[indexTrans(mazeStart[0], mazeStart[1], cols)].getValue() !== 9) {
         maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setValue(2);
+        maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setVisited(true);
       }
-
-      // Add the start point to queue
+      //we set starting point
       q.push(maze[indexTrans(mazeStart[0], mazeStart[1], cols)]);
-
       while (q.length > 0) {
-        cell = q.splice(0, 1)[0];
-        index = indexTrans(cell.getX(), cell.getY(), cols);
-        map[index] = [];
-
+        cell = q.pop();
+        //set variables to recreate path..
         if (maze[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
           console.log("Finish!!!");
           lastPoint = indexTrans(cell.getX(), cell.getY(), cols);
           startPoint = indexTrans(mazeStart[0], mazeStart[1], cols);
           return null;
         }
-        await maze[indexTrans(cell.getX(), cell.getY(), cols)].setValue(2);
-        await maze[indexTrans(cell.getX(), cell.getY(), cols)].setVisited(true);
-        //Right neighbor
+
+        //recreate map
+        index = indexTrans(cell.getX(), cell.getY(), cols);
+        map[index] = [];
+
+        if ((cell.getValue() !== 2) | !cell.getVisited()) {
+          cell.setValue(2);
+          cell.setVisited(true);
+        }
+        let neighbors = [];
+        //we add cell neighbors
         if (isFree(cell.getX() + 1, cell.getY()) === true) {
-          
-          let next = await maze[indexTrans(cell.getX() + 1, cell.getY(), cols)];
+          let neighborR = await maze[
+            indexTrans(cell.getX() + 1, cell.getY(), cols)
+          ];
           map[index].push(indexTrans(cell.getX() + 1, cell.getY(), cols));
-          q.push(next);
+          neighbors.push(neighborR);
         }
-        //Left neighbor
         if (isFree(cell.getX() - 1, cell.getY()) === true) {
-          
-          let next = await maze[indexTrans(cell.getX() - 1, cell.getY(), cols)];
+          let neighborL = await maze[
+            indexTrans(cell.getX() - 1, cell.getY(), cols)
+          ];
           map[index].push(indexTrans(cell.getX() - 1, cell.getY(), cols));
-          q.push(next);
+
+          neighbors.push(neighborL);
         }
-        //Down neighbor
         if (isFree(cell.getX(), cell.getY() + 1) === true) {
-          let next = await maze[indexTrans(cell.getX(), cell.getY() + 1, cols)];
+          let neighborD = await maze[
+            indexTrans(cell.getX(), cell.getY() + 1, cols)
+          ];
           map[index].push(indexTrans(cell.getX(), cell.getY() + 1, cols));
 
-          q.push(next);
+          neighbors.push(neighborD);
         }
-        //Up neighbor
         if (isFree(cell.getX(), cell.getY() - 1) === true) {
-          let next = await maze[indexTrans(cell.getX(), cell.getY() - 1, cols)];
+          let neighborU = await maze[
+            indexTrans(cell.getX(), cell.getY() - 1, cols)
+          ];
           map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
-          q.push(next);
+
+          neighbors.push(neighborU);
         }
-      }
-    } else {
-      return null;
-    }
-    return null;
-  }
 
-  /**
-   * Provided the encoded 1D array of cells it will traverse it via DFS method
-   * @param {*} maze 
-   */
-  async function dfs(maze) {
-    let q = [];
-    let cell = undefined
-    let index
-    if (maze[indexTrans(mazeStart[0], mazeStart[1], cols)].getValue() !== 9) {
-      maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setValue(2);
-      maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setVisited(true);
-    }
-    //we set starting point
-    q.push(maze[indexTrans(mazeStart[0], mazeStart[1], cols)]);
-    while (q.length > 0) {
-
-      cell = q.pop()
-      //set variables to recreate path..
-      if (maze[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
-        console.log("Finish!!!");
-        lastPoint = indexTrans(cell.getX(), cell.getY(), cols);
-        startPoint = indexTrans(mazeStart[0], mazeStart[1], cols);
-        return null;
-      }
-
-      //recreate map
-      index = indexTrans(cell.getX(), cell.getY(), cols);
-      map[index] = [];
-
-      if (cell.getValue() !== 2 | !cell.getVisited()) {
-        cell.setValue(2)
-        cell.setVisited(true)
-      }
-      let neighbors = []
-      //we add cell neighbors 
-      if (isFree(cell.getX() + 1, cell.getY()) === true) {
-
-        let neighborR = await maze[indexTrans(cell.getX() + 1, cell.getY(), cols)];
-        map[index].push(indexTrans(cell.getX() + 1, cell.getY(), cols));
-        neighbors.push(neighborR);
-      }
-      if (isFree(cell.getX() - 1, cell.getY()) === true) {
-
-        let neighborL = await maze[indexTrans(cell.getX() - 1, cell.getY(), cols)];
-        map[index].push(indexTrans(cell.getX() - 1, cell.getY(), cols));
-
-        neighbors.push(neighborL);
-      }
-      if (isFree(cell.getX(), cell.getY() + 1) === true) {
-
-        let neighborD = await maze[indexTrans(cell.getX(), cell.getY() + 1, cols)];
-        map[index].push(indexTrans(cell.getX(), cell.getY() + 1, cols));
-
-
-        neighbors.push(neighborD);
-      }
-      if (isFree(cell.getX(), cell.getY() - 1) === true) {
-
-        let neighborU = await maze[indexTrans(cell.getX(), cell.getY() - 1, cols)];
-        map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
-
-        neighbors.push(neighborU);
-      }
-
-      for (let i = 0; i < neighbors.length; i++) {
-        let cellNeighbor = neighbors[i]
-        if (cellNeighbor && !cellNeighbor.getVisited() && cellNeighbor.getValue() !== 2) {
-          q.push(cellNeighbor)
+        for (let i = 0; i < neighbors.length; i++) {
+          let cellNeighbor = neighbors[i];
+          if (
+            cellNeighbor &&
+            !cellNeighbor.getVisited() &&
+            cellNeighbor.getValue() !== 2
+          ) {
+            q.push(cellNeighbor);
+          }
         }
       }
     }
-  }
-  /**
-   * Function that reads the state of each individual cell in the map. Code inspired by https://www.youtube.com/watch?v=HyK_Q5rrcr4
-   * 
-   * @param {*} x 
-   * @param {*} y 
-   * @param {*} walls 
-   * @param {*} value 
-   * @param {*} visited 
-   * @param {*} size 
-   */
-  function show(x, y, walls = [true, true, true, true], value, visited, size) {
-    const w = size;
-    var coord_x = Math.floor((x + 1) * w);
-    var coord_y = Math.floor((y + 1) * w);
-    if (visited === true) {
-      p.stroke(255, 0, 255, 100);
-      p.fill(255, 0, 255, 100);
-      p.rect(coord_x, coord_y, w, w);
-      p.stroke(255, 255, 255);
-    }
-    switch (value) {
-      //salida
-      case 9:
-        p.stroke(255, 0, 100);
-        p.fill(255, 0, 100);
+    /**
+     * Function that reads the state of each individual cell in the map. Code inspired by https://www.youtube.com/watch?v=HyK_Q5rrcr4
+     *
+     * @param {*} x
+     * @param {*} y
+     * @param {*} walls
+     * @param {*} value
+     * @param {*} visited
+     * @param {*} size
+     */
+    function show(
+      x,
+      y,
+      walls = [true, true, true, true],
+      value,
+      visited,
+      size
+    ) {
+      const w = size;
+      var coord_x = Math.floor((x + 1) * w);
+      var coord_y = Math.floor((y + 1) * w);
+      if (visited === true) {
+        p.stroke(255, 0, 255, 100);
+        p.fill(255, 0, 255, 100);
         p.rect(coord_x, coord_y, w, w);
         p.stroke(255, 255, 255);
-        break;
-      //entrada
-      case 3:
-        p.stroke(14, 239, 21);
-        p.fill(14, 239, 21);
-        p.rect(coord_x, coord_y, w, w);
-        p.stroke(255, 255, 255);
-        break;
-      default:
-        p.stroke(255, 255, 255);
-        p.noFill();
-        break;
-    }
+      }
+      switch (value) {
+        //salida
+        case 9:
+          p.stroke(255, 0, 100);
+          p.fill(255, 0, 100);
+          p.rect(coord_x, coord_y, w, w);
+          p.stroke(255, 255, 255);
+          break;
+        //entrada
+        case 3:
+          p.stroke(14, 239, 21);
+          p.fill(14, 239, 21);
+          p.rect(coord_x, coord_y, w, w);
+          p.stroke(255, 255, 255);
+          break;
+        default:
+          p.stroke(255, 255, 255);
+          p.noFill();
+          break;
+      }
 
-    if (walls[0]) {
-      //top
-      p.line(coord_x, coord_y, coord_x + w, coord_y);
-    }
+      if (walls[0]) {
+        //top
+        p.line(coord_x, coord_y, coord_x + w, coord_y);
+      }
 
-    if (walls[1]) {
-      //right
-      p.line(coord_x + w, coord_y, coord_x + w, coord_y + w);
-    }
+      if (walls[1]) {
+        //right
+        p.line(coord_x + w, coord_y, coord_x + w, coord_y + w);
+      }
 
-    if (walls[2]) {
-      //bottom
-      p.line(coord_x, coord_y + w, coord_x + w, coord_y + w);
-    }
+      if (walls[2]) {
+        //bottom
+        p.line(coord_x, coord_y + w, coord_x + w, coord_y + w);
+      }
 
-    if (walls[3]) {
-      //left
-      p.line(coord_x, coord_y + w, coord_x, coord_y);
+      if (walls[3]) {
+        //left
+        p.line(coord_x, coord_y + w, coord_x, coord_y);
+      }
     }
-  }
+  };
 }
