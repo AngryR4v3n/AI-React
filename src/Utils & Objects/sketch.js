@@ -1,5 +1,9 @@
 import { indexTrans } from "./functions";
 
+let map = {};
+let lastPoint;
+let startPoint;
+
 export default function sketch(p) {
   let grid = null;
   let size = null;
@@ -24,7 +28,7 @@ export default function sketch(p) {
     }
   };
 
-  p.draw = () => {
+   p.draw = async() => {
     p.background(51);
     p.stroke(255, 255, 255);
     if ((grid != null) & (size != null)) {
@@ -41,10 +45,32 @@ export default function sketch(p) {
     }
 
     if (execute === true) {
-      bfs(grid);
+      await bfs(grid);
       execute = false;
+
+      let path = await makePath();
+      grid[startPoint].setValue(3)
+      for(let i = 0; i<path.length; i++){
+        grid[path[i]].setValue(9)
+      }
     }
   };
+
+  function makePath() {
+    let path = [];
+    let crr = lastPoint;
+    let a = 0;
+    while (crr !== startPoint) {
+      for (let key in map) {
+        if (map[parseInt(key)].includes(crr)) {
+          path.push(crr);
+          crr = parseInt(key);
+        }
+      }
+      a++;
+    }
+    return path;
+  }
 
   function isFree(i, j) {
     if (
@@ -74,8 +100,8 @@ export default function sketch(p) {
     return false;
   }
   async function bfs(maze) {
+    let index;
     let q = [];
-    let prev = [];
     let cell = undefined;
     if (maze.length > 0) {
       // Set the start point
@@ -87,13 +113,14 @@ export default function sketch(p) {
       q.push(maze[indexTrans(mazeStart[0], mazeStart[1], cols)]);
 
       while (q.length > 0) {
-        if (cell) {
-          prev.push(cell);
-        }
         cell = q.splice(0, 1)[0];
+        index = indexTrans(cell.getX(), cell.getY(), cols);
+        map[index] = [];
 
         if (maze[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
-          console.log("reached", prev);
+          console.log("Finish!!!");
+          lastPoint = indexTrans(cell.getX(), cell.getY(), cols);
+          startPoint = indexTrans(mazeStart[0], mazeStart[1], cols);
           return null;
         }
         await maze[indexTrans(cell.getX(), cell.getY(), cols)].setValue(2);
@@ -102,21 +129,26 @@ export default function sketch(p) {
         if (isFree(cell.getX() + 1, cell.getY()) === true) {
           //visita el siguiente punto.
           let next = await maze[indexTrans(cell.getX() + 1, cell.getY(), cols)];
+          map[index].push(indexTrans(cell.getX() + 1, cell.getY(), cols));
           q.push(next);
         }
         if (isFree(cell.getX() - 1, cell.getY()) === true) {
           //visita el siguiente punto.
           let next = await maze[indexTrans(cell.getX() - 1, cell.getY(), cols)];
+          map[index].push(indexTrans(cell.getX() - 1, cell.getY(), cols));
           q.push(next);
         }
         if (isFree(cell.getX(), cell.getY() + 1) === true) {
           //visita el siguiente punto.
           let next = await maze[indexTrans(cell.getX(), cell.getY() + 1, cols)];
+          map[index].push(indexTrans(cell.getX(), cell.getY() + 1, cols));
+
           q.push(next);
         }
         if (isFree(cell.getX(), cell.getY() - 1) === true) {
           //visita el siguiente punto.
           let next = await maze[indexTrans(cell.getX(), cell.getY() - 1, cols)];
+          map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
           q.push(next);
         }
 
