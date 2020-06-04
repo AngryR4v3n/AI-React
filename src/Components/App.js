@@ -145,7 +145,7 @@ export default class App extends React.Component {
 
     this.calculateDims()
 
-    alert("When the path is shown, please reload the site to solve the maze again.")
+    alert("When the path is shown, please reload the site to solve the maze again.\n \t Thanks to Hayri Yigit for assistance during the project")
     this.setState = {
       grid: [],
       cols: 0,

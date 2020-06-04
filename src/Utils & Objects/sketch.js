@@ -70,7 +70,9 @@ export default function sketch(p) {
             execute = bfs();
             break;
           case "2":
-            dfs(grid);
+            
+            execute = dfs();
+            console.log(execute)
             break;
           case null:
             console.log("pass");
@@ -82,7 +84,7 @@ export default function sketch(p) {
         }
         //draw path
         if (!execute) {
-          console.log("Map:", map);
+        
           let path = makePath();
           await grid[startPoint].setValue(3);
           for (let i = 0; i < path.length; i++) {
@@ -132,29 +134,18 @@ export default function sketch(p) {
     }
     /**
      * Provided the encoded 1D array of cells it will traverse it via BFS method
-     * @param {*} maze
+     *
      */
     function bfs() {
-      // cell = q.splice(0, 1)[0];
       cell = q.shift();
-      console.log(q);
-      
       index = indexTrans(cell.getX(), cell.getY(), cols);
-      
+
       if (grid[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 2) {
-        
+
         return true;
       }
 
       map[index] = [];
-
-      if(indexTrans(cell.getX(), cell.getY(), cols) === 31){
-        console.log("Right Neighbor:", isFree(cell.getX()+1, cell.getY()))
-        console.log("Left Neighbor:", isFree(cell.getX()-1, cell.getY()))
-        console.log("Up Neighbor:", isFree(cell.getX(), cell.getY()-1))
-        console.log("Bottom Neighbor:", isFree(cell.getX(), cell.getY()+1))
-
-      }
 
       if (grid[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
         console.log("Finish!!!");
@@ -195,81 +186,81 @@ export default function sketch(p) {
 
     /**
      * Provided the encoded 1D array of cells it will traverse it via DFS method
-     * @param {*} maze
+     *
      */
-    async function dfs(maze) {
-      let q = [];
-      let cell = undefined;
-      let index;
-      if (maze[indexTrans(mazeStart[0], mazeStart[1], cols)].getValue() !== 9) {
-        maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setValue(2);
-        maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setVisited(true);
+    function dfs() {
+      
+      if (grid[indexTrans(mazeStart[0], mazeStart[1], cols)].getValue() !== 9) {
+        grid[indexTrans(mazeStart[0], mazeStart[1], cols)].setValue(2);
+        grid[indexTrans(mazeStart[0], mazeStart[1], cols)].setVisited(true);
       }
       //we set starting point
-      q.push(maze[indexTrans(mazeStart[0], mazeStart[1], cols)]);
-      while (q.length > 0) {
-        cell = q.pop();
-        //set variables to recreate path..
-        if (maze[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
-          console.log("Finish!!!");
-          lastPoint = indexTrans(cell.getX(), cell.getY(), cols);
-          startPoint = indexTrans(mazeStart[0], mazeStart[1], cols);
-          return null;
-        }
+      cell = q.pop();
+      //set variables to recreate path..
+      if (grid[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
+        console.log("Finish!!!");
+        lastPoint = indexTrans(cell.getX(), cell.getY(), cols);
+        startPoint = indexTrans(mazeStart[0], mazeStart[1], cols);
+        return false;
+      }
 
-        //recreate map
-        index = indexTrans(cell.getX(), cell.getY(), cols);
-        map[index] = [];
+      //recreate map
+      index = indexTrans(cell.getX(), cell.getY(), cols);
+      
 
-        if ((cell.getValue() !== 2) | !cell.getVisited()) {
-          cell.setValue(2);
-          cell.setVisited(true);
-        }
-        let neighbors = [];
-        //we add cell neighbors
-        if (isFree(cell.getX() + 1, cell.getY()) === true) {
-          let neighborR = await maze[
-            indexTrans(cell.getX() + 1, cell.getY(), cols)
-          ];
-          map[index].push(indexTrans(cell.getX() + 1, cell.getY(), cols));
-          neighbors.push(neighborR);
-        }
-        if (isFree(cell.getX() - 1, cell.getY()) === true) {
-          let neighborL = await maze[
-            indexTrans(cell.getX() - 1, cell.getY(), cols)
-          ];
-          map[index].push(indexTrans(cell.getX() - 1, cell.getY(), cols));
+      console.log(q)
+      map[index] = [];
 
-          neighbors.push(neighborL);
-        }
-        if (isFree(cell.getX(), cell.getY() + 1) === true) {
-          let neighborD = await maze[
-            indexTrans(cell.getX(), cell.getY() + 1, cols)
-          ];
-          map[index].push(indexTrans(cell.getX(), cell.getY() + 1, cols));
+      if ((cell.getValue() !== 2) | !cell.getVisited()) {
+        cell.setValue(2);
+        cell.setVisited(true);
+      }
+      let neighbors = [];
+      //we add cell neighbors
+      if (isFree(cell.getX() + 1, cell.getY()) === true) {
+        let neighborR =  grid[
+          indexTrans(cell.getX() + 1, cell.getY(), cols)
+        ];
+        map[index].push(indexTrans(cell.getX() + 1, cell.getY(), cols));
+        neighbors.push(neighborR);
+      }
+      if (isFree(cell.getX() - 1, cell.getY()) === true) {
+        let neighborL =  grid[
+          indexTrans(cell.getX() - 1, cell.getY(), cols)
+        ];
+        map[index].push(indexTrans(cell.getX() - 1, cell.getY(), cols));
 
-          neighbors.push(neighborD);
-        }
-        if (isFree(cell.getX(), cell.getY() - 1) === true) {
-          let neighborU = await maze[
-            indexTrans(cell.getX(), cell.getY() - 1, cols)
-          ];
-          map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
+        neighbors.push(neighborL);
+      }
+      if (isFree(cell.getX(), cell.getY() + 1) === true) {
+        let neighborD =  grid[
+          indexTrans(cell.getX(), cell.getY() + 1, cols)
+        ];
+        map[index].push(indexTrans(cell.getX(), cell.getY() + 1, cols));
 
-          neighbors.push(neighborU);
-        }
+        neighbors.push(neighborD);
+      }
+      if (isFree(cell.getX(), cell.getY() - 1) === true) {
+        let neighborU = grid[
+          indexTrans(cell.getX(), cell.getY() - 1, cols)
+        ];
+        map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
 
-        for (let i = 0; i < neighbors.length; i++) {
-          let cellNeighbor = neighbors[i];
-          if (
-            cellNeighbor &&
-            !cellNeighbor.getVisited() &&
-            cellNeighbor.getValue() !== 2
-          ) {
-            q.push(cellNeighbor);
-          }
+        neighbors.push(neighborU);
+      }
+
+      for (let i = 0; i < neighbors.length; i++) {
+        let cellNeighbor = neighbors[i];
+        if (
+          cellNeighbor &&
+          !cellNeighbor.getVisited() &&
+          cellNeighbor.getValue() !== 2
+        ) {
+          console.log(cellNeighbor)
+          q.push(cellNeighbor);
         }
       }
+      return true
     }
     /**
      * Function that reads the state of each individual cell in the map. Code inspired by https://www.youtube.com/watch?v=HyK_Q5rrcr4
