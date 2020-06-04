@@ -28,7 +28,7 @@ export default function sketch(p) {
     }
   };
 
-   p.draw = async() => {
+  p.draw = async () => {
     p.background(51);
     p.stroke(255, 255, 255);
     if ((grid != null) & (size != null)) {
@@ -45,12 +45,13 @@ export default function sketch(p) {
     }
 
     if (execute === true) {
-      await bfs(grid);
+      await dfs(grid);
       execute = false;
-
+      
       let path = await makePath();
+      console.log(startPoint)
       grid[startPoint].setValue(3)
-      for(let i = 0; i<path.length; i++){
+      for (let i = 0; i < path.length; i++) {
         grid[path[i]].setValue(9)
       }
     }
@@ -59,7 +60,6 @@ export default function sketch(p) {
   function makePath() {
     let path = [];
     let crr = lastPoint;
-    let a = 0;
     while (crr !== startPoint) {
       for (let key in map) {
         if (map[parseInt(key)].includes(crr)) {
@@ -67,7 +67,7 @@ export default function sketch(p) {
           crr = parseInt(key);
         }
       }
-      a++;
+
     }
     return path;
   }
@@ -81,22 +81,9 @@ export default function sketch(p) {
       ((grid[indexTrans(i, j, cols)].getValue() === 0) |
         (grid[indexTrans(i, j, cols)].getValue() === 9))
     ) {
-      // console.log(
-      //   "letting value:",
-      //   grid[indexTrans(i, j, cols)].getValue(),
-      //   "at positions",
-      //   grid[indexTrans(i, j, cols)].getX(),
-      //   grid[indexTrans(i, j, cols)].getY()
-      // );
       return true;
     }
-    // console.log(
-    //   "NOT value:",
-    //   grid[indexTrans(i, j, cols)].getValue(),
-    //   "at positions",
-    //   grid[indexTrans(i, j, cols)].getX(),
-    //   grid[indexTrans(i, j, cols)].getY()
-    // );
+
     return false;
   }
   async function bfs(maze) {
@@ -151,16 +138,84 @@ export default function sketch(p) {
           map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
           q.push(next);
         }
-
-        /*
-        else{
-          console.log("null case ", cell.getX(), cell.getY())
-        }*/
       }
     } else {
       return null;
     }
-    return "hola";
+    return null;
+  }
+
+
+  async function dfs(maze) {
+    let q = [];
+    let cell = undefined
+    let limit = 0
+    let index
+    if (maze[indexTrans(mazeStart[0], mazeStart[1], cols)].getValue() !== 9) {
+      maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setValue(2);
+      maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setVisited(true);
+    }
+    //we set starting point
+    q.push(maze[indexTrans(mazeStart[0], mazeStart[1], cols)]);
+    while (q.length > 0 && limit < 200) {
+      
+      cell = q.pop()
+      //set variables to recreate path..
+      if (maze[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
+        console.log("Finish!!!");
+        lastPoint = indexTrans(cell.getX(), cell.getY(), cols);
+        startPoint = indexTrans(mazeStart[0], mazeStart[1], cols);
+        return null;
+      }
+
+      //recreate map
+      index = indexTrans(cell.getX(), cell.getY(), cols);
+      map[index] = [];
+
+      if (cell.getValue() !== 2 | !cell.getVisited()) {
+        cell.setValue(2)
+        cell.setVisited(true)
+      }
+      let neighbors = []
+      //we add cell neighbors 
+      if (isFree(cell.getX() + 1, cell.getY()) === true) {
+
+        let neighborR = await maze[indexTrans(cell.getX() + 1, cell.getY(), cols)];
+        map[index].push(indexTrans(cell.getX() + 1, cell.getY(), cols));
+        neighbors.push(neighborR);
+      }
+      if (isFree(cell.getX() - 1, cell.getY()) === true) {
+
+        let neighborL = await maze[indexTrans(cell.getX() - 1, cell.getY(), cols)];
+        map[index].push(indexTrans(cell.getX() - 1, cell.getY(), cols));
+
+        neighbors.push(neighborL);
+      }
+      if (isFree(cell.getX(), cell.getY() + 1) === true) {
+
+        let neighborD = await maze[indexTrans(cell.getX(), cell.getY() + 1, cols)];
+        map[index].push(indexTrans(cell.getX(), cell.getY() + 1, cols));
+
+
+        neighbors.push(neighborD);
+      }
+      if (isFree(cell.getX(), cell.getY() - 1) === true) {
+
+        let neighborU = await maze[indexTrans(cell.getX(), cell.getY() - 1, cols)];
+        map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
+
+        neighbors.push(neighborU);
+      }
+
+      for (let i = 0; i < neighbors.length; i++) {
+        let cellNeighbor = neighbors[i]
+        if (cellNeighbor && !cellNeighbor.getVisited() && cellNeighbor.getValue() !== 2) {
+          q.push(cellNeighbor)
+        }
+      }
+      limit++
+
+    }
   }
 
   function show(x, y, walls = [true, true, true, true], value, visited, size) {
@@ -213,7 +268,5 @@ export default function sketch(p) {
       //left
       p.line(coord_x, coord_y + w, coord_x, coord_y);
     }
-    //noFill();
-    //rect(x,coord_y,w,w)
   }
 }
