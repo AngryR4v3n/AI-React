@@ -1,5 +1,4 @@
 import React from 'react';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../CSS/App.css';
 import Maze from './Maze.js'
@@ -15,10 +14,14 @@ export default class App extends React.Component {
       sizeCell: 0,
       text: "",
       special: [],
+      algorithm: null
     }
   }
 
-
+  /**
+   * Method used to find the exit and entrance, it looks in the param the last 2 lines,
+   * splits them to get the values of coordinates, and transforms such coordinates into our local coordinate system
+   */
   identifySpecials = (paramArr) => {
     let entrance = this.state.text[this.state.text.length - 2]
     let exit = this.state.text[this.state.text.length - 1]
@@ -51,7 +54,9 @@ export default class App extends React.Component {
 
   }
   i
-
+  /**
+   * Method called onSubmit. This will set all the variables needed to render the map.
+   */
   addFile = (e) => {
     e.preventDefault()
     let tmpArr = []
@@ -62,20 +67,20 @@ export default class App extends React.Component {
       }
     }
 
-    //hasta aqui tenemos ya el 2d arr en tmpArr...
+    //we have the 2d arr of chars.
     this.setState({
       text: tmpArr
     })
 
     var tmpMap = []
-    //carguemos el mapa
+    //load the map of cell objects
     for (let i = 0; i < this.state.rows; i++) {
       for (let j = 0; j < this.state.cols; j++) {
         tmpMap.push(new Cell(j, i, [false, false, false, false], 0))
       }
     }
 
-    //agregemos paredes externas
+    //external walls
     for (let i = 0; i < this.state.rows; i++) {
 
       //top border
@@ -94,7 +99,7 @@ export default class App extends React.Component {
 
     }
 
-    //agregemos paredes internas
+    //Lets set internal walls
     for (let i = 1; i < this.state.rows; i++) {
       for (let j = 1; j < this.state.cols; j++) {
         if (this.state.text[i][j] === '|') {
@@ -120,7 +125,7 @@ export default class App extends React.Component {
 
       }
     }
-
+    //decide whether we need column or wall
     for (let i = 1; i < this.state.rows; i++) {
       for (let j = 1; j < this.state.cols; j++) {
         if (this.state.text[i][j] === '-') {
@@ -139,14 +144,29 @@ export default class App extends React.Component {
     })
 
     this.calculateDims()
-  }
 
+    alert("When the path is shown, please reload the site to solve the maze again.")
+    this.setState = {
+      grid: [],
+      cols: 0,
+      rows: 0,
+      sizeCell: 0,
+      text: "",
+      special: [],
+      algorithm: null
+    }
+  }
+  /**
+   * calculates size of cell depending on the width and height of the map.
+   */
   calculateDims = (width = 600) => {
     this.setState({
       sizeCell: Math.floor(width / this.state.cols) - 3
     })
   }
-
+  /**
+   * Receives a string and iterates through it, and returns array of chars.
+   */
   linetoArr = (str) => {
     let i = 0
     let char_arr = []
@@ -171,9 +191,21 @@ export default class App extends React.Component {
                     onChange={e => this.handleFile(e.target.files[0])} />
                   <label className="custom-file-label" htmlFor="customFile">Choose file</label>
                 </div>
-                <button type="submit" id="submit" className="btn btn-primary" onClick={this.addFile}>Submit</button>
+                <h5 className="sub">Select the algorithm to solve the maze</h5>
+                <label className="radio-inline">
+                  <input onChange={e => this.setState({ algorithm: e.target.value })} type="radio" name="survey" id="Radios1" value={1} />
+                    BFS
+                </label>
+                <label className="radio-inline">
+                  <input onChange={e => this.setState({ algorithm: e.target.value })} type="radio" name="survey" id="Radios2" value={2} />
+                      DFS
+                </label>
+                <br></br>
+                {this.state.algorithm === null | this.state.rows === 0 ?
+                  <button type="submit" id="submit" className="btn btn-primary" disabled onClick={this.addFile}>Submit</button> :
+                  <button type="submit" id="submit" className="btn btn-primary" onClick={this.addFile}>Submit</button>}
               </form>
-              <Maze mazeGrid={this.state.actualMaze} codedMaze={this.state.grid} dim={this.state.sizeCell} cols={this.state.cols} mazeStart={this.state.special} />
+              <Maze mazeGrid={this.state.actualMaze} codedMaze={this.state.grid} dim={this.state.sizeCell} cols={this.state.cols} mazeStart={this.state.special} alg={this.state.algorithm} />
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { indexTrans } from "./functions";
-
+//variables for path backtrack tracing
 let map = {};
 let lastPoint;
 let startPoint;
@@ -10,13 +10,16 @@ export default function sketch(p) {
   let mazeStart = [];
   let cols;
   let execute = false;
+  let alg = null
+
+  //setup of maze with null values.
   p.setup = () => {
     var myCanvas = p.createCanvas(600, 600);
     myCanvas.parent("canvas");
     p.frameRate(30);
-    //p.noLoop()
-  };
 
+  };
+  //This is called when props are updated.
   p.myCustomRedrawAccordingToNewPropsHandler = (props) => {
     if (props.codedMaze.length > 0) {
       grid = props.codedMaze;
@@ -24,7 +27,7 @@ export default function sketch(p) {
       cols = props.cols;
       mazeStart = props.mazeStart;
       execute = true;
-      console.log(execute);
+      alg = props.alg
     }
   };
 
@@ -43,20 +46,35 @@ export default function sketch(p) {
         );
       }
     }
-
+    //decides which algorithm we will use
     if (execute === true) {
-      await dfs(grid);
+      switch (alg) {
+        case "1":
+          await bfs(grid);
+          break;
+        case "2":
+          await dfs(grid);
+          break
+        case null:
+          console.log("pass")
+          break
+
+        default:
+          alert("This is a major error")
+          break;
+      }
+      //draw path
       execute = false;
-      
       let path = await makePath();
-      console.log(startPoint)
       grid[startPoint].setValue(3)
       for (let i = 0; i < path.length; i++) {
         grid[path[i]].setValue(9)
       }
     }
   };
-
+  /**
+   * Function that provided as key the parent cell will return the child cells, used to backtrack original position.
+   */
   function makePath() {
     let path = [];
     let crr = lastPoint;
@@ -71,7 +89,11 @@ export default function sketch(p) {
     }
     return path;
   }
-
+  /**
+   * Used by BFS to determine whether it can be visited or not.
+   * @param {*} i -> x
+   * @param {*} j  -> y
+   */
   function isFree(i, j) {
     if (
       (i >= 0) &
@@ -86,6 +108,10 @@ export default function sketch(p) {
 
     return false;
   }
+  /**
+   * Provided the encoded 1D array of cells it will traverse it via BFS method
+   * @param {*} maze 
+   */
   async function bfs(maze) {
     let index;
     let q = [];
@@ -112,28 +138,29 @@ export default function sketch(p) {
         }
         await maze[indexTrans(cell.getX(), cell.getY(), cols)].setValue(2);
         await maze[indexTrans(cell.getX(), cell.getY(), cols)].setVisited(true);
-
+        //Right neighbor
         if (isFree(cell.getX() + 1, cell.getY()) === true) {
-          //visita el siguiente punto.
+          
           let next = await maze[indexTrans(cell.getX() + 1, cell.getY(), cols)];
           map[index].push(indexTrans(cell.getX() + 1, cell.getY(), cols));
           q.push(next);
         }
+        //Left neighbor
         if (isFree(cell.getX() - 1, cell.getY()) === true) {
-          //visita el siguiente punto.
+          
           let next = await maze[indexTrans(cell.getX() - 1, cell.getY(), cols)];
           map[index].push(indexTrans(cell.getX() - 1, cell.getY(), cols));
           q.push(next);
         }
+        //Down neighbor
         if (isFree(cell.getX(), cell.getY() + 1) === true) {
-          //visita el siguiente punto.
           let next = await maze[indexTrans(cell.getX(), cell.getY() + 1, cols)];
           map[index].push(indexTrans(cell.getX(), cell.getY() + 1, cols));
 
           q.push(next);
         }
+        //Up neighbor
         if (isFree(cell.getX(), cell.getY() - 1) === true) {
-          //visita el siguiente punto.
           let next = await maze[indexTrans(cell.getX(), cell.getY() - 1, cols)];
           map[index].push(indexTrans(cell.getX(), cell.getY() - 1, cols));
           q.push(next);
@@ -145,11 +172,13 @@ export default function sketch(p) {
     return null;
   }
 
-
+  /**
+   * Provided the encoded 1D array of cells it will traverse it via DFS method
+   * @param {*} maze 
+   */
   async function dfs(maze) {
     let q = [];
     let cell = undefined
-    let limit = 0
     let index
     if (maze[indexTrans(mazeStart[0], mazeStart[1], cols)].getValue() !== 9) {
       maze[indexTrans(mazeStart[0], mazeStart[1], cols)].setValue(2);
@@ -157,8 +186,8 @@ export default function sketch(p) {
     }
     //we set starting point
     q.push(maze[indexTrans(mazeStart[0], mazeStart[1], cols)]);
-    while (q.length > 0 && limit < 200) {
-      
+    while (q.length > 0) {
+
       cell = q.pop()
       //set variables to recreate path..
       if (maze[indexTrans(cell.getX(), cell.getY(), cols)].getValue() === 9) {
@@ -213,11 +242,18 @@ export default function sketch(p) {
           q.push(cellNeighbor)
         }
       }
-      limit++
-
     }
   }
-
+  /**
+   * Function that reads the state of each individual cell in the map. Code inspired by https://www.youtube.com/watch?v=HyK_Q5rrcr4
+   * 
+   * @param {*} x 
+   * @param {*} y 
+   * @param {*} walls 
+   * @param {*} value 
+   * @param {*} visited 
+   * @param {*} size 
+   */
   function show(x, y, walls = [true, true, true, true], value, visited, size) {
     const w = size;
     var coord_x = Math.floor((x + 1) * w);

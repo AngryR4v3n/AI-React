@@ -15,7 +15,12 @@ export function transformLocations(arr) {
     }
     return arr
 }
-
+/**
+ * Provided an orderly pushed cells from row and column it will find the position in a 1D maze given 2D coordinates
+ * @param {*} i 
+ * @param {*} j 
+ * @param {*} cols 
+ */
 export function indexTrans(i, j, cols){
     return i + j * (cols);
   }

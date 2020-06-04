@@ -6,7 +6,7 @@ const Maze = (props) => {
     return (
         <div className="row justify-content-center align-items-center">
             <div className=".col-xl-1" id="canvas">
-                <P5Wrapper codedMaze={props.codedMaze} sketch={sketch} size={props.dim} cols={props.cols} mazeStart={props.mazeStart} />
+                <P5Wrapper alg={props.alg} codedMaze={props.codedMaze} sketch={sketch} size={props.dim} cols={props.cols} mazeStart={props.mazeStart} />
             </div>
         </div>
     )
