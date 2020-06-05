@@ -1,3 +1,27 @@
+## Project for AI
+
+Project made by Francisco Molina - Inspired in https://www.youtube.com/watch?v=HyK_Q5rrcr4
+Assisted by Hayri Yigit 
+
+## Requirements to run project
+Please have installed the following:
+
+- Node.Js at least version 12.x
+- NPM version 6.x or yarn
+
+## Running
+- Clone repository
+- Run command in terminal / cmd -> npm install
+- Run command npm start
+- Go to http://localhost:3000
+
+
+## Usage:
+- Select maze.txt file added in repository
+- Select algorithm to be used
+- Click submit button
+## NOTE: Please reload the page after the path finishes.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
