@@ -3,7 +3,7 @@
   "name": "ai_project",
   "version": "0.1.0",
   "engines": {
-    "node": "13.x"
+    "node": "12.x"
   },
   "private": true,
   "dependencies": {
@@ -19,9 +19,9 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
-    "predeploy": "npm run build",
+    "predeploy": "react-scripts build",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
